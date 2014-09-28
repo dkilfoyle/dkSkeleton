@@ -1,0 +1,81 @@
+
+/* the next 4 rules hack tocify to live with max-width */
+
+
+/* stop text filling entire width of wide screens */
+body .main-container {
+  max-width: 1200px;
+}
+
+body {
+  padding-top: 20px;
+}
+
+/* put toc above text once width < 900px */
+@media (max-width: 900px) {
+  #toc {
+      position: relative;
+      width: 100%;
+      margin: 0px 0px 20px 0px;
+  }
+}
+
+/* usual setting of 20% doesn't work once width > max-width */
+
+.tocify {
+  width: 200px;
+}
+
+.gmisc_table {
+  border-collapse: collapse;
+  border-spacing: 0; /* IE 6 */
+  
+  /* Center */
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 2em;
+  width: 80%;
+  margin-bottom: 2em;
+  
+  /*margin-left: 1em;
+  margin-top: 1em;*/
+}
+
+h1 {
+  padding-bottom: 0.3em;
+  font-size: 2.25em;
+  line-height: 1.2;
+  margin-top: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.title {
+  margin-bottom: 30px;
+  margin-top: 0px;
+  border-bottom: 1px solid;
+}
+
+h2 {
+  padding-bottom: 0.3em;
+  font-size: 1.75em;
+  line-height: 1.225;
+  border-bottom: 1px solid #eee;
+}
+
+h3 {
+  font-size: 1.5em;
+  line-height: 1.43;
+}
+
+h4 {
+  font-size: 1.25em;
+}
+
+h5 {
+  font-size: 1em;
+}
+
+h6 {
+  font-size: 1em;
+  color: #777;
+}

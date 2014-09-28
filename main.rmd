@@ -1,0 +1,100 @@
+---
+title: "My Project"
+output:
+  html_document:
+    css: include/buttondown2.css
+    includes:
+      after_body: include/after_body.html
+      before_body: include/before_body.html
+      in_header: include/in_header.html
+    self_contained: yes
+---
+
+```{r setup, echo=FALSE, warning=F, message=FALSE}
+library(knitr)
+opts_chunk$set(comment="") # remove the comment symbol from knitr output
+opts_chunk$set(echo=F, fig.cap="")
+opts_chunk$set(message=F, warning=F) # unless debugging
+
+require(ggplot2)
+require(dplyr)
+require(reshape2)
+require(tidyr)
+require(ez)
+
+options(scipen=3)
+source("loadData.r")
+source("r/table1.R")
+source("r/utils.R")
+```
+
+# Methods
+
+Bla bla bl
+
+# Demographics
+
+Cases and controls are well matched for age and gender. 
+
+```{r results='asis'}
+selectedFields = structure(c("Age", "Sex", "2", "2"), .Dim = c(2L, 2L))
+colOptions = structure(c("Case", "Control", "c", "c", "Subjects", "Subjects"), .Dim = 2:3)
+cat(table1(mydata, "Case.Control", selectedFields, colOptions, 
+           add_total_col = T, statistics = T, NEJMstyle = T, colN = T,
+           caption="", caption.loc = "top", tfoot=""))
+```
+
+# 1 Numeric
+
+histogram
+normality
+
+# 2 Numeric
+
+```{r}
+ggplot(hdeyes2, aes(x=UHDRS, y=OCT.t)) +
+  geom_point(shape=2) +
+  geom_smooth(method="lm")
+```
+
+# 1 numeric by 2 level factor
+
+```{r }
+ggplot(mydata, aes(x=myfactor, y=mynumeric)) +
+  geom_boxplot() +
+  scale_x_discrete(labels=c("level1","level2")) +
+  guides(fill=guide_legend(title=NULL)) +
+  ylab("ylab")
+```
+
+```{r }
+t.test(mynumeric ~ myfactor, data=mydata)
+```
+
+# 1 numeric by n level factor
+
+anova
+
+# Correlation Matrix
+
+```{r fig.width=11, fig.height=11}
+mydata %>%
+  #filter(Case.Control=="Case") %>%
+  select(Age, Weight, NIHSS, Duration) %>%
+  ezCor(., label_size=8)
+```
+
+# Normality Tests
+
+```{r}
+x1=ggplot(hdeyes, aes(x=Mean.R.OCT.ave)) +  geom_histogram()
+x2=ggplot(hdeyes, aes(sample=Mean.R.OCT.ave)) + stat_qq()
+multiplot(x1, x2, cols=2)
+```
+
+Shapiro-Wilk test = normal if p > 0.05. 
+
+```{r}
+shapiro.test(hdeyes$Mean.R.OCT.ave)
+```
+

@@ -1,0 +1,461 @@
+---
+title: "HDEyes"
+output:
+  html_document:
+    css: buttondown2.css
+    includes:
+      after_body: include/after_body.html
+      before_body: include/before_body.html
+      in_header: include/in_header.html
+    self_contained: yes
+---
+
+```{r setup, echo=FALSE, warning=F, message=FALSE}
+library(knitr)
+opts_chunk$set(comment="") # remove the comment symbol from knitr output
+opts_chunk$set(echo=F, fig.cap="")
+opts_chunk$set(message=F, warning=F) # unless debugging
+
+
+require(ggplot2)
+require(dplyr)
+require(reshape2)
+require(tidyr)
+require(ez)
+
+options(scipen=3)
+source("hdeyes.r")
+source("r/table1.R")
+source("r/utils.R")
+```
+
+# Methods
+
+Both eyes were examined for each patient and control subject. After analysis confirmed no significant difference in the measurements from each eye all subsequent comparisons were performed using data from the right eye only. Countinuous variables are presented as mean ± standard deviation (SD). Normality of distribution was assessed by the Shapiro-Wilk test. Comparison of normally distributed variables was performed by 2 sample t-test. The Wilcoxon Rank Sum test was used for non-parametric comparisons. Chi-square test was used to compare differences in categorical variables. Correlation analysis was performed with the Spearman test. A p-value below 0.05 was considered significant.
+
+# Demographics
+
+Cases and controls are well matched for age and gender. 
+
+```{r results='asis'}
+selectedFields = structure(c("Age", "Sex", "2", "2"), .Dim = c(2L, 2L))
+colOptions = structure(c("Case", "Control", "c", "c", "Subjects", "Subjects"), .Dim = 2:3)
+cat(table1(hddemo, "Case.Control", selectedFields, colOptions, 
+           add_total_col = T, statistics = TRUE, NEJMstyle = TRUE, colN = TRUE,
+           caption="", 
+           caption.loc = "top",
+           tfoot=""))
+```
+
+# Visual Parameters
+
+VA (as measured by logMAR BCVA) is different in cases vs controls. There is no difference in IOP or ONH.
+
+```{r table1, results='asis'}
+selectedFields = structure(c("R.VA", "L.VA", "R.IOP", "L.IOP", "R.ONH", "L.ONH", 
+                             "2", "2", "2", "2", "2", "2"), .Dim = c(6L, 2L))
+colOptions = structure(c("Case", "Control", "c", "c", "Subjects", "Subjects"), .Dim = c(2,3))
+cat(table1(hddemo, "Case.Control", selectedFields, colOptions, 
+           add_total_col = T, statistics = TRUE, NEJMstyle = TRUE, colN = TRUE,
+           caption="", 
+           caption.loc = "top",
+           tfoot=""))
+```
+
+# RNFL
+
+## Mean overall RNFL thickness
+
+There is no difference in the mean total OCT between cases and controls in either eye.
+
+> What are the units for OCT thickness and volume?
+
+```{r }
+ggplot(hdeyes, aes(x=Case.Control, y=Mean.R.OCT.ave)) +
+  geom_boxplot()
+```
+
+```{r }
+t.test(Mean.R.OCT.ave ~ Case.Control, data=hdeyes)
+```
+
+## RNFL by Quadrants
+
+The temporal quadrant shows a significant difference between cases and controls.
+
+```{r}
+hdeyes %>%
+  select(Case.Control, R.S.OCT.mean, R.N.OCT.mean, R.I.OCT.mean, R.T.OCT.mean) %>%
+  gather(Quadrant, OCT.mean, R.S.OCT.mean:R.T.OCT.mean) %>%
+  ggplot(., aes(x=Quadrant, y=OCT.mean, fill=Case.Control)) +
+    geom_boxplot() +
+    scale_x_discrete(labels=c("Superior","Nasal","Inferior","Temporal")) +
+    guides(fill=guide_legend(title=NULL)) +
+    ylab("OCT (?units?)") #TODO
+```
+
+```{r results="asis"}
+dktt = function(x,y) {
+  return(pvalueFormatter(t.test(x ~ y)$p.value))
+}
+
+x=hdeyes %>%
+  select(Case.Control, R.S.OCT.mean, R.N.OCT.mean, R.I.OCT.mean, R.T.OCT.mean) %>%
+  gather(Quadrant, OCT.mean, R.S.OCT.mean:R.T.OCT.mean) %>%
+  group_by(Quadrant) %>%
+  summarise(Case=round(mean(OCT.mean[Case.Control=="Case"], na.rm=T),1),
+            Control=round(mean(OCT.mean[Case.Control=="Control"], na.rm=T),1),
+            p=dktt(OCT.mean, Case.Control))
+
+row.names(x)=c("Superior","Nasal","Inferior","Temporal")
+x=x[,-1]
+htmlTable(x, rowlabel="", cgroup=c("Mean OCT", ""), n.cgroup=c(2,1))
+```
+
+This difference was seen in both eyes
+
+```{r}
+hdeyes %>%
+  gather(Quadrant, OCT, R.T.OCT.mean, L.T.OCT.mean) %>%
+  mutate(Side = substring(Quadrant,1,1), Quadrant = substring(Quadrant, 3,3)) %>%
+  ggplot(., aes(x=Side, y=OCT, fill=Case.Control)) +
+    geom_boxplot() +
+    guides(fill=guide_legend(title=NULL))
+```
+
+## RNFL Clinical Correlations
+
+As expected there are positive correlations between UHDRS and CAG repeat size, HDBS (Burden score) and Duration. There is a trend to decreasing OCT values (especially the superior and temporal quadrants) with increasing CAG, UHDRS, Duration, HDBS but not age. 
+
+> Correlation matrix rules: number is signed R^2, font size proportional to size of R^2, red color shows Pearson's p < 0.05.
+
+```{r fig.width=11, fig.height=11}
+hdeyes %>%
+  filter(Case.Control=="Case") %>%
+  mutate(OCT.all = Mean.R.OCT.ave, 
+         OCT.s = R.S.OCT.mean,
+         OCT.n = R.N.OCT.mean, 
+         OCT.i = R.I.OCT.mean,
+         OCT.t = R.T.OCT.mean) %>%
+  select(Age, CAG, UHDRS, Duration, HDBS, OCT.all:OCT.t) %>%
+  ezCor(., label_size=8)
+```
+
+For example: Trend to decrease OCT.temporal with increasing UHDRS but wide confidence interval to slope. 
+
+```{r}
+ggplot(hdeyes2, aes(x=UHDRS, y=OCT.t)) +
+  geom_point(shape=2) +
+  geom_smooth(method="lm")
+```
+
+## Temporal RNFL and VA
+
+```{r }
+ toct = c(hdeyes$R.T.OCT.mean, hdeyes$L.T.OCT.mean)
+ va = c(hdeyes$REVA, hdeyes$LEVA)
+ octva = data.frame(T.OCT = toct, VA=va)
+ggplot(octva, aes(x=VA, y=T.OCT)) +
+    geom_point(size=3) +
+    geom_smooth(method="lm")
+```
+
+> The apparent association is mostly due to the 2 outliers. Visual inspect suggests the bulk of the points show no convincing relationship.
+
+# Macular Volume
+
+```{r }
+ggplot(hdeyes, aes(x=Case.Control, y=R.mac.vol.mean)) +
+  geom_boxplot()
+```
+
+```{r }
+t.test(R.mac.vol.mean ~ Case.Control, data=hdeyes)
+```
+
+## Macular Volume Clinical Correlations
+
+Interestingly, although macular volume is not significantly different in cases and controls, it does show a negative correlation with both UHDRS and Duration but less clearly with Age.
+
+```{r fig.width=11, fig.height=11}
+hdeyes %>%
+  filter(Case.Control=="Case") %>%
+  mutate(Mac.vol = R.mac.vol.mean) %>%
+  select(Age, CAG, UHDRS, Duration, HDBS, Mac.vol) %>%
+  ezCor(.)
+```
+
+```{r}
+hdeyes %>%
+  filter(Case.Control=="Case") %>%
+  mutate(Mac.vol = R.mac.vol.mean) %>%
+  select(Age, CAG, UHDRS, Duration, HDBS, Mac.vol) %>%
+  ggplot(., aes(x=UHDRS, y=Mac.vol)) +
+    geom_point(size=3) +
+    geom_smooth(method="lm")
+```
+
+
+
+## Macular Volume by quadrant
+
+There are no significant differences in macular volume between cases and controls.
+
+```{r}
+hdeyes %>%
+  select(Case.Control, R.SO.vol.mean, R.SI.vol.mean, 
+         R.NO.vol.mean, R.NI.vol.mean, 
+         R.IO.vol.mean, R.II.vol.mean, 
+         R.TO.vol.mean, R.TI.vol.mean) %>%
+  gather(Sector, Mac.vol, R.SO.vol.mean:R.TI.vol.mean) %>%
+  ggplot(., aes(x=Sector, y=Mac.vol, fill=Case.Control)) +
+    geom_boxplot() +
+    scale_x_discrete(labels = c("SO","SI","NO","NI","IO","II","TO","TI")) +
+    guides(fill=guide_legend(title=NULL)) +
+    ylab("Macular Volume")
+```
+
+```{r results='asis'}
+dktt = function(x,y) {
+  return(pvalueFormatter(t.test(x ~ y)$p.value))
+}
+
+x=hdeyes %>%
+  select(Case.Control, 
+         R.SO.vol.mean,
+         R.NO.vol.mean,
+         R.IO.vol.mean,
+         R.TO.vol.mean,
+         R.SI.vol.mean,
+         R.NI.vol.mean,
+         R.II.vol.mean,
+         R.TI.vol.mean) %>%
+  gather(Quadrant, Vol.mean, R.SO.vol.mean:R.TI.vol.mean) %>%
+  group_by(Quadrant) %>%
+  summarise(Case=format(mean(Vol.mean[Case.Control=="Case"], na.rm=T),digits=2, nsmall=2),
+            Control=format(mean(Vol.mean[Case.Control=="Control"], na.rm=T),digits=2, nsmall=2),
+            p=dktt(Vol.mean, Case.Control))
+
+row.names(x)=c("SO","NO","IO","TO","SI","NI","II","TI")
+x=x[,-1]
+htmlTable(x, rowlabel="", cgroup=c("Mean Vol", ""), n.cgroup=c(2,1))
+```
+
+# Macular Thickness
+
+There are no significant differences in macular thickness between cases and controls.
+
+```{r}
+hdeyes2 = hdeyes %>%
+  select(Case.Control, R.SO.thick.mean, R.SI.thick.mean, 
+         R.NO.thick.mean, R.NI.thick.mean, 
+         R.IO.thick.mean, R.II.thick.mean, 
+         R.TO.thick.mean, R.TI.thick.mean) %>%
+  gather(Sector, Mac.thick.mean, R.SO.thick.mean:R.TI.thick.mean)
+
+levels(hdeyes2$Sector) = c("SO","SI","NO","NI","IO","II","TO","TI")
+
+ggplot(hdeyes2, aes(x=Sector, y=Mac.thick.mean, fill=Case.Control)) +
+  geom_boxplot()
+```
+
+```{r results='asis'}
+x1 = t.test(R.SO.thick.mean ~ Case.Control, data=hdeyes)
+x2 = t.test(R.SI.thick.mean ~ Case.Control, data=hdeyes)
+x3 = t.test(R.NO.thick.mean ~ Case.Control, data=hdeyes)
+x4 = t.test(R.NI.thick.mean ~ Case.Control, data=hdeyes)
+x5 = t.test(R.IO.thick.mean ~ Case.Control, data=hdeyes)
+x6 = t.test(R.II.thick.mean ~ Case.Control, data=hdeyes)
+x7 = t.test(R.TO.thick.mean ~ Case.Control, data=hdeyes)
+x8 = t.test(R.TI.thick.mean ~ Case.Control, data=hdeyes)
+
+thick.t.tests = data.frame(
+  Cases = round(c(x1$estimate[[1]], x2$estimate[[1]], x3$estimate[[1]], x4$estimate[[1]], 
+                  x5$estimate[[1]], x6$estimate[[1]], x7$estimate[[1]], x8$estimate[[1]]),2),
+  Controls = round(c(x1$estimate[[2]], x2$estimate[[2]], x3$estimate[[2]], x4$estimate[[2]], 
+                     x5$estimate[[2]], x6$estimate[[2]], x7$estimate[[2]], x8$estimate[[2]]),2),
+  P.Value = as.numeric(pvalueFormatter(c(x1$p.value, x2$p.value, x3$p.value, x4$p.value,
+                                         x5$p.value, x6$p.value, x7$p.value, x8$p.value))), 
+  row.names=c("SO","SI","NO","NI","IO","II","TO","TI"))
+htmlTable(thick.t.tests, align=c("c","c","c"),  cgroup=c("Mean Thickness", ""), n.cgroup=c(2,1))
+```
+
+
+
+# Foveal thickness
+
+There is no difference in foveal thickness comparing cases and controls.
+
+```{r }
+ggplot(hdeyes, aes(x=Case.Control, y=Mean.R.fov.thick)) +
+  geom_boxplot()
+```
+
+```{r }
+t.test(Mean.R.fov.thick ~ Case.Control, data=hdeyes)
+```
+
+# Right vs Left Eye
+
+Analysis shows no important within subject side to side difference in any measure. 
+
+## Overall RNFL
+
+```{r}
+hdeyes2 = hdeyes %>%
+  filter(Case.Control=="Case") %>%
+  select(Mean.R.OCT.ave, mean.L.OCT.ave, Study.Number) %>%
+  gather(key=Side, value=OCT.overall, -Study.Number) %>%
+  mutate(Side = substring(Side,6,6))
+
+x1=ggplot(hdeyes2, aes(x=Side, y=OCT.overall, group=Study.Number)) + geom_point() + geom_line() + ggtitle("Cases")
+
+hdeyes2 = hdeyes %>%
+  filter(Case.Control=="Control") %>%
+  select(Mean.R.OCT.ave, mean.L.OCT.ave, Study.Number) %>%
+  gather(key=Side, value=OCT.overall, -Study.Number) %>%
+  mutate(Side = substring(Side,6,6))
+
+x2=ggplot(hdeyes2, aes(x=Side, y=OCT.overall, group=Study.Number)) + geom_point() + geom_line() + ggtitle("Controls")
+
+multiplot(x1,x2)
+```
+
+### Paired T Tests for Right vs Left for Cases and Controls
+
+Note: no significant differences
+
+```{r }
+cases=hdeyes[hdeyes$Case.Control=="Case", ]
+controls=hdeyes[hdeyes$Case.Control=="Control", ]
+t.test(cases$Mean.R.OCT.ave, cases$mean.L.OCT.ave, paired=T)
+t.test(controls$Mean.R.OCT.ave, controls$mean.L.OCT.ave, paired=T)
+```
+
+## Quadrant RNFL
+
+```{r}
+# hdeyes2 = hdeyes %>%
+#   filter(Case.Control=="Case") %>%
+#   select(ends_with("OCT.mean")) %>%
+#   gather(key=Quadrant, value=OCT.mean)
+# 
+# hdeyes2$Side = substring(hdeyes2$Quadrant,1,1)
+# hdeyes2$Quadrant = substring(hdeyes2$Quadrant,3)
+# 
+# x1=ggplot(hdeyes2, aes(x=Quadrant, y=OCT.mean, fill=Side)) + geom_boxplot()
+# 
+# hdeyes2 = hdeyes %>%
+#   filter(Case.Control=="Control") %>%
+#   select(ends_with("OCT.mean")) %>%
+#   gather(key=Quadrant, value=OCT.mean)
+# 
+# hdeyes2$Side = substring(hdeyes2$Quadrant,1,1)
+# hdeyes2$Quadrant = substring(hdeyes2$Quadrant,3)
+# 
+# x2=ggplot(hdeyes2, aes(x=Quadrant, y=OCT.mean, fill=Side)) + geom_boxplot()
+# 
+# multiplot(x1,x2)
+```
+
+Paired T Tests for Right vs Left for Cases and Controls show no significant within subject side to side difference
+
+```{r results='asis'}
+cases=hdeyes[hdeyes$Case.Control=="Case", ]
+controls=hdeyes[hdeyes$Case.Control=="Control", ]
+x=data.frame(Cases=c(t.test(cases$R.S.OCT.mean, cases$L.S.OCT.mean, paired=T)$p.value,
+                     t.test(cases$R.N.OCT.mean, cases$L.N.OCT.mean, paired=T)$p.value,
+                     t.test(cases$R.I.OCT.mean, cases$L.I.OCT.mean, paired=T)$p.value,
+                     t.test(cases$R.T.OCT.mean, cases$L.T.OCT.mean, paired=T)$p.value),
+             Controls=c(t.test(controls$R.S.OCT.mean, controls$L.S.OCT.mean, paired=T)$p.value,
+                     t.test(controls$R.N.OCT.mean, controls$L.N.OCT.mean, paired=T)$p.value,
+                     t.test(controls$R.I.OCT.mean, controls$L.I.OCT.mean, paired=T)$p.value,
+                     t.test(controls$R.T.OCT.mean, controls$L.T.OCT.mean, paired=T)$p.value),
+             row.names=c("Superior","Nasal","Inferior","Temporal"))
+x$Cases = format.pval(x$Cases, eps=0.001, digits=3)
+x$Controls = format.pval(x$Controls, eps=0.001, digits=3)
+htmlTable(x, align=c("c","c"))
+```
+
+## Macular Thickness
+
+```{r}
+# hdeyes2 = hdeyes %>%
+#   filter(Case.Control=="Case") %>%
+#   select(ends_with("thick.mean")) %>%
+#   gather(key=Quadrant, value=thick.mean)
+# 
+# hdeyes2$Side = substring(hdeyes2$Quadrant,1,1)
+# hdeyes2$Quadrant = substring(hdeyes2$Quadrant,3,4)
+# 
+# x1=ggplot(hdeyes2, aes(x=Quadrant, y=thick.mean, fill=Side)) + geom_boxplot() + ggtitle("Cases")
+# 
+# hdeyes2 = hdeyes %>%
+#   filter(Case.Control=="Control") %>%
+#   select(ends_with("thick.mean")) %>%
+#   gather(key=Quadrant, value=thick.mean)
+# 
+# hdeyes2$Side = substring(hdeyes2$Quadrant,1,1)
+# hdeyes2$Quadrant = substring(hdeyes2$Quadrant,3,4)
+# 
+# x2=ggplot(hdeyes2, aes(x=Quadrant, y=thick.mean, fill=Side)) + geom_boxplot() + ggtitle("Controls")
+# 
+# multiplot(x1,x2)
+```
+
+Paired T Tests for Right vs Left for Cases and Controls show no significant within subject side to side difference
+
+```{r results='asis'}
+cases=hdeyes[hdeyes$Case.Control=="Case", ]
+controls=hdeyes[hdeyes$Case.Control=="Control", ]
+x=data.frame(Cases=c(t.test(cases$R.SO.thick.mean, cases$L.SO.thick.mean, paired=T)$p.value,
+                     t.test(cases$R.SI.thick.mean, cases$L.SI.thick.mean, paired=T)$p.value,
+                     t.test(cases$R.NO.thick.mean, cases$L.NO.thick.mean, paired=T)$p.value,
+                     t.test(cases$R.NI.thick.mean, cases$L.NI.thick.mean, paired=T)$p.value,
+                     t.test(cases$R.IO.thick.mean, cases$L.IO.thick.mean, paired=T)$p.value,
+                     t.test(cases$R.II.thick.mean, cases$L.II.thick.mean, paired=T)$p.value,
+                     t.test(cases$R.TO.thick.mean, cases$L.TO.thick.mean, paired=T)$p.value,
+                     t.test(cases$R.TI.thick.mean, cases$L.TI.thick.mean, paired=T)$p.value),
+             Controls=c(t.test(controls$R.SO.thick.mean, controls$L.SO.thick.mean, paired=T)$p.value,
+                     t.test(controls$R.SI.thick.mean, controls$L.SI.thick.mean, paired=T)$p.value,
+                     t.test(controls$R.NO.thick.mean, controls$L.NO.thick.mean, paired=T)$p.value,
+                     t.test(controls$R.NI.thick.mean, controls$L.NI.thick.mean, paired=T)$p.value,
+                     t.test(controls$R.IO.thick.mean, controls$L.IO.thick.mean, paired=T)$p.value,
+                     t.test(controls$R.II.thick.mean, controls$L.II.thick.mean, paired=T)$p.value,
+                     t.test(controls$R.TO.thick.mean, controls$L.TO.thick.mean, paired=T)$p.value,
+                     t.test(controls$R.TI.thick.mean, controls$L.TI.thick.mean, paired=T)$p.value),
+             row.names=c("SO","SI","NO", "NI", "IO", "II", "TO", "TI"))
+x$Cases = format.pval(x$Cases, eps=0.001, digits=3)
+x$Controls = format.pval(x$Controls, eps=0.001, digits=3)
+htmlTable(x, align=c("c","c"))
+```
+
+# Normality Tests
+
+## RNFL
+
+```{r}
+x1=ggplot(hdeyes, aes(x=Mean.R.OCT.ave)) +  geom_histogram()
+x2=ggplot(hdeyes, aes(sample=Mean.R.OCT.ave)) + stat_qq()
+multiplot(x1, x2, cols=2)
+```
+
+Shapiro-Wilk test = normal if p > 0.05. OCT is reasonably normal - we will use parametric tests.
+
+```{r}
+shapiro.test(hdeyes$Mean.R.OCT.ave)
+```
+
+## Macular Volume
+
+```{r}
+x1=ggplot(hdeyes, aes(x=R.mac.vol.mean)) +  geom_histogram()
+x2=ggplot(hdeyes, aes(sample=R.mac.vol.mean)) + stat_qq()
+multiplot(x1, x2, cols=2)
+```
+
+Shapiro-Wilk test = normal if p > 0.05
+
+```{r}
+shapiro.test(hdeyes$R.mac.vol.mean)
+```
