@@ -1,13 +1,7 @@
 ---
 title: "My Project"
-output:
-  html_document:
-    css: include/buttondown2.css
-    includes:
-      after_body: include/after_body.html
-      before_body: include/before_body.html
-      in_header: include/in_header.html
-    self_contained: yes
+bibliography: project.bib
+csl: include/neurology.csl
 ---
 
 ```{r setup, echo=FALSE, warning=F, message=FALSE}
@@ -18,7 +12,6 @@ opts_chunk$set(message=F, warning=F) # unless debugging
 
 require(ggplot2)
 require(dplyr)
-require(reshape2)
 require(tidyr)
 require(ez)
 
@@ -28,73 +21,88 @@ source("r/table1.R")
 source("r/utils.R")
 ```
 
+#### {.abstract}
+
+**Abstract** We studied the effect of x on y. *Methods*: Subjects were selected randomly and compared to controls. *Results*: There were N subjects aged x-y. The primary outcome occured in x% vs y% p=0.01. *Conclusion*: There was a significant effect.
+
+# Background
+
+Here I reference a paper [@Josephson2005].
+
 # Methods
 
 Bla bla bl
 
-# Demographics
+# Results
+
+## Demographics
 
 Cases and controls are well matched for age and gender. 
 
 ```{r results='asis'}
-selectedFields = structure(c("Age", "Sex", "2", "2"), .Dim = c(2L, 2L))
+selectedFields = structure(c("numeric1", "numeric2", "2", "2"), .Dim = c(2L, 2L))
 colOptions = structure(c("Case", "Control", "c", "c", "Subjects", "Subjects"), .Dim = 2:3)
-cat(table1(mydata, "Case.Control", selectedFields, colOptions, 
-           add_total_col = T, statistics = T, NEJMstyle = T, colN = T,
+cat(table1(mydata, "factor1", selectedFields, colOptions, 
+           add_total_col = F, statistics = T, NEJMstyle = T, colN = T,
            caption="", caption.loc = "top", tfoot=""))
 ```
 
-# 1 Numeric
+## 1 Numeric
 
 histogram
 normality
 
-# 2 Numeric
+## 2 Numeric
 
 ```{r}
-ggplot(hdeyes2, aes(x=UHDRS, y=OCT.t)) +
+ggplot(mydata, aes(x=numeric1, y=numeric2)) +
   geom_point(shape=2) +
   geom_smooth(method="lm")
 ```
 
-# 1 numeric by 2 level factor
+## 1 numeric by 2 level factor
 
 ```{r }
-ggplot(mydata, aes(x=myfactor, y=mynumeric)) +
-  geom_boxplot() +
-  scale_x_discrete(labels=c("level1","level2")) +
-  guides(fill=guide_legend(title=NULL)) +
-  ylab("ylab")
+ggplot(mydata, aes(x=factor1, y=numeric1)) +
+  geom_boxplot() #+
+  #scale_x_discrete(labels=c("level1","level2")) +
+  #guides(fill=guide_legend(title=NULL)) +
+  #ylab("ylab")
 ```
 
 ```{r }
-t.test(mynumeric ~ myfactor, data=mydata)
+#t.test(numeric1 ~ factor1, data=mydata)
 ```
 
-# 1 numeric by n level factor
+## 1 numeric by n level factor
 
 anova
 
-# Correlation Matrix
+## Correlation Matrix
 
 ```{r fig.width=11, fig.height=11}
 mydata %>%
   #filter(Case.Control=="Case") %>%
-  select(Age, Weight, NIHSS, Duration) %>%
+  select(numeric1, numeric2) %>%
   ezCor(., label_size=8)
 ```
 
-# Normality Tests
+## Normality Tests
 
 ```{r}
-x1=ggplot(hdeyes, aes(x=Mean.R.OCT.ave)) +  geom_histogram()
-x2=ggplot(hdeyes, aes(sample=Mean.R.OCT.ave)) + stat_qq()
+x1=ggplot(mydata, aes(x=numeric1)) +  geom_histogram()
+x2=ggplot(mydata, aes(sample=numeric1)) + stat_qq()
 multiplot(x1, x2, cols=2)
 ```
 
 Shapiro-Wilk test = normal if p > 0.05. 
 
 ```{r}
-shapiro.test(hdeyes$Mean.R.OCT.ave)
+shapiro.test(mydata$numeric1)
 ```
 
+`r knit_child("child1.rmd")`
+
+# Conclusion
+
+# Bibliography
