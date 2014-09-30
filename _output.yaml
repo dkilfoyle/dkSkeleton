@@ -1,0 +1,9 @@
+html_document:
+  css: include/buttondown2.css
+  includes:
+    after_body: include/after_body.html
+    before_body: include/before_body.html
+    in_header: include/in_header.html
+  self_contained: yes
+
+
