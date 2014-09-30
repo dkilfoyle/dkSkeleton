@@ -11,6 +11,12 @@ body {
   padding-top: 20px;
 }
 
+.abstract p {
+  margin-right: 40px;
+  margin-left: 40px;
+  font-style: italic;
+}
+
 /* put toc above text once width < 900px */
 @media (max-width: 900px) {
   #toc {
