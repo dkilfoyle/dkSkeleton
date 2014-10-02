@@ -1,3 +1,6 @@
 [submodule "tools/table1"]
 	path = tools/table1
 	url = https://github.com/dkilfoyle/Table1.git
+[submodule "tools/shiny-explorer"]
+	path = tools/shiny-explorer
+	url = https://github.com/dkilfoyle/shiny-explorer.git
