@@ -17,8 +17,9 @@ require(ez)
 
 options(scipen=3)
 source("loadData.r")
-source("r/table1.R")
-source("r/utils.R")
+source("r/table1.r")
+source("r/PlotUtils.r")
+source("r/ReportUtils.r")
 ```
 
 #### {.abstract}
