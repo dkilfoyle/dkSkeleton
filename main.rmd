@@ -48,6 +48,13 @@ cat(table1(mydata, "factor1", selectedFields, colOptions,
            caption="", caption.loc = "top", tfoot=""))
 ```
 
+## Dataframe as table
+
+```{r}
+# ReportUtils options should insert automatic table numbering
+htmlTable(x, align="ccc", caption="Mean OCT by Quadrant", tableCSSclass="gmisc_table60")
+```
+
 ## 1 Numeric
 
 histogram
