@@ -14,3 +14,11 @@ mydata$factor1 = factor(replace(mydata$factor1, mydata$factor1=="virginica", "ve
 # mydata = mydata %>%
 #   mutate(myDate = as.Date(myDate, format="%d/%m/%Y"),
 #          myDateTime = as.POSIXct(myDateTime, format="%d/%m/%Y %H:%M", tz=""))
+
+table1 = function() {
+  shiny:::runApp("tools/Table1", launch.browser = rstudio::viewer)
+}
+
+shinyExplorer = function() {
+  shiny:::runApp("../shiny-explorer", launch.browser = rstudio::viewer)
+}
