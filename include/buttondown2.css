@@ -29,7 +29,8 @@ body {
 /* usual setting of 20% doesn't work once width > max-width */
 
 .tocify {
-  width: 200px;
+  width: 220px;
+  margin-left: 0%;
 }
 
 .gmisc_table {
