@@ -52,7 +52,7 @@ cat(table1(mydata, "factor1", selectedFields, colOptions,
 
 ```{r}
 # ReportUtils options should insert automatic table numbering
-htmlTable(x, align="ccc", caption="Mean OCT by Quadrant", tableCSSclass="gmisc_table60")
+#htmlTable(x, align="ccc", caption="Mean OCT by Quadrant", tableCSSclass="gmisc_table60")
 ```
 
 ## 1 Numeric
@@ -62,7 +62,7 @@ normality
 
 ## 2 Numeric
 
-```{r}
+```{r fig.cap=fn("Plot of numeric1 vs numeric2")}
 ggplot(mydata, aes(x=numeric1, y=numeric2)) +
   geom_point(shape=2) +
   geom_smooth(method="lm")

@@ -1,4 +1,5 @@
 require(Gmisc)
+require(knitr)
 
 # gmisc htmlTable automatic numbering
 options(table_counter = T)
@@ -8,16 +9,41 @@ fn = local({
   i = 0
   function(x) {
     i <<- i + 1
-    paste('Figure ', i, ': ', x, sep = '')
+    paste('**Figure ', i, '**: ', x, sep = '')
   }
 })
 
-tn = local({
-  i = 0
-  function(x) {
-    i <<- i + 1
-    paste('\n\n:Table ', i, ': ', x, sep = '')
-  }
-})
+# Alternative to gmisc table_counter
+# use tab.cap="my caption"
+# tn = local({
+#   i = 0
+#   function(x) {
+#     i <<- i + 1
+#     paste('\n\n:Table ', i, ': ', x, sep = '')
+#   }
+# })
+# 
+# knit_hooks$set(tab.cap = function(before, options, envir) {
+#   if(!before)
+#     tn(options$tab.cap)
+# })
+# 
+# ##default_output_hook = knit_hooks$get("output")
+# 
+# knit_hooks$set(output = function(x, options) {
+#   if (is.null(options$tab.cap) == F) 
+#     x
+#   else
+#     knitr:::.output(x, options)
+#     ##default_output_hook(x,options)
+# })
+# 
+# tn = local({
+#   i = 0
+#   function(x) {
+#     i <<- i + 1
+#     paste('\n\n:Table ', i, ': ', x, sep = '')
+#   }
+# })
 
 
