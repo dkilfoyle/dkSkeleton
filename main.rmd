@@ -5,21 +5,17 @@ csl: include/neurology.csl
 ---
 
 ```{r setup, echo=FALSE, warning=F, message=FALSE}
-library(knitr)
-opts_chunk$set(comment="") # remove the comment symbol from knitr output
-opts_chunk$set(echo=F, fig.cap="")
-opts_chunk$set(message=F, warning=F) # unless debugging
+source("r/ReportUtils.r")
 
 require(ggplot2)
 require(dplyr)
 require(tidyr)
 require(ez)
 
-options(scipen=3)
 source("loadData.r")
 source("r/table1.r")
 source("r/PlotUtils.r")
-source("r/ReportUtils.r")
+
 ```
 
 #### {.abstract}
@@ -88,7 +84,7 @@ anova
 
 ## Correlation Matrix
 
-```{r fig.width=11, fig.height=11}
+```{r }
 mydata %>%
   #filter(Case.Control=="Case") %>%
   select(numeric1, numeric2) %>%

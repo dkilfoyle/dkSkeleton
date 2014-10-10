@@ -1,6 +1,14 @@
 require(Gmisc)
 require(knitr)
 
+opts_chunk$set(dev="png", dev.args=list(type="cairo"), dpi=96)
+opts_chunk$set(comment="") # remove the comment symbol from knitr output
+opts_chunk$set(echo=F, fig.cap="")
+opts_chunk$set(message=F, warning=F) # unless debugging
+
+# decimals
+options(scipen=3)
+
 # gmisc htmlTable automatic numbering
 options(table_counter = T)
 options(table_counter_str = "<b>Table %s:</b> ")
