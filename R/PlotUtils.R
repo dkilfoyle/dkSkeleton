@@ -1,3 +1,7 @@
+# change ggplot to black and white theme - comment out for usual grey theme
+require(ggplot2)
+#theme_set(theme_bw())
+
 multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
   require(grid)
   
