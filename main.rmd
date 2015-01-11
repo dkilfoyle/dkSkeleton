@@ -40,11 +40,11 @@ Bla bla bl
 Cases and controls are well matched for age and gender. 
 
 ```{r results='asis'}
-selectedFields = structure(c("numeric1", "numeric2", "2", "2"), .Dim = c(2L, 2L))
-colOptions = structure(c("Case", "Control", "c", "c", "Subjects", "Subjects"), .Dim = 2:3)
-cat(table1(mydata, "factor1", selectedFields, colOptions, 
-           add_total_col = F, statistics = T, NEJMstyle = T, colN = T,
-           caption="", caption.loc = "top", tfoot=""))
+# selectedFields = structure(c("numeric1", "numeric2", "2", "2"), .Dim = c(2L, 2L))
+# colOptions = structure(c("Case", "Control", "c", "c", "Subjects", "Subjects"), .Dim = 2:3)
+# cat(table1(mydata, "factor1", selectedFields, colOptions, 
+#            add_total_col = F, statistics = T, NEJMstyle = T, colN = T,
+#            caption="", caption.loc = "top", tfoot=""))
 ```
 
 ## 1 Numeric
