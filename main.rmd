@@ -5,20 +5,17 @@ csl: include/neurology.csl
 ---
 
 ```{r setup, echo=FALSE, warning=F, message=FALSE}
-library(knitr)
-opts_chunk$set(comment="") # remove the comment symbol from knitr output
-opts_chunk$set(echo=F, fig.cap="")
-opts_chunk$set(message=F, warning=F) # unless debugging
+source("r/ReportUtils.r")
 
 require(ggplot2)
 require(dplyr)
 require(tidyr)
 require(ez)
 
-options(scipen=3)
 source("loadData.r")
-source("r/table1.R")
-source("r/utils.R")
+source("r/table1.r")
+source("r/PlotUtils.r")
+
 ```
 
 #### {.abstract}
@@ -47,6 +44,13 @@ Cases and controls are well matched for age and gender.
 #            caption="", caption.loc = "top", tfoot=""))
 ```
 
+## Dataframe as table
+
+```{r}
+# ReportUtils options should insert automatic table numbering
+#htmlTable(x, align="ccc", caption="Mean OCT by Quadrant", tableCSSclass="gmisc_table60")
+```
+
 ## 1 Numeric
 
 histogram
@@ -54,7 +58,7 @@ normality
 
 ## 2 Numeric
 
-```{r}
+```{r fig.cap=fn("Plot of numeric1 vs numeric2")}
 ggplot(mydata, aes(x=numeric1, y=numeric2)) +
   geom_point(shape=2) +
   geom_smooth(method="lm")
@@ -80,7 +84,7 @@ anova
 
 ## Correlation Matrix
 
-```{r fig.width=11, fig.height=11}
+```{r }
 mydata %>%
   #filter(Case.Control=="Case") %>%
   select(numeric1, numeric2) %>%

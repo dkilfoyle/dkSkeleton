@@ -1,4 +1,5 @@
 html_document:
+  fig_caption: yes
   css: include/buttondown2.css
   includes:
     after_body: include/after_body.html
