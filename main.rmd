@@ -49,7 +49,8 @@ Cases and controls are well matched for age and gender.
 ```{r }
 # ReportUtils options should insert automatic table numbering
 # don't need results='asis' since htmlTable v1.02
-htmlTable(head(x), align="ccc", caption="Mean OCT by Quadrant", css.class="gmisc_table60")
+# htmlTable(head(x), align="ccc", caption="Mean OCT by Quadrant", css.class="gmisc_table60")
+kable(head(iris), caption=tabRef("iristable","My iris caption"))
 ```
 
 ## 1 Numeric
@@ -86,10 +87,10 @@ anova
 ## Correlation Matrix
 
 ```{r }
-mydata %>%
-  #filter(Case.Control=="Case") %>%
-  select(numeric1, numeric2) %>%
-  ezCor(., label_size=8)
+# mydata %>%
+#   #filter(Case.Control=="Case") %>%
+#   select(numeric1, numeric2) %>%
+#   ezCor(., label_size=8)
 ```
 
 ## Normality Tests
@@ -111,3 +112,20 @@ shapiro.test(mydata$numeric1)
 # Conclusion
 
 # Bibliography
+
+
+```{r}
+# check all referenced figures and table are valid ie exist
+if (!all(environment(figRef)$created)) {
+    missingFig <- which(!environment(figRef)$created)
+    warning("Figure(s) ", paste(missingFig, sep = ", "), " with label(s) '", 
+        paste(names(environment(figRef)$created)[missingFig], 
+            sep = "', '"), "' are referenced in the text but have never been created.")
+}
+if (!all(environment(figRef)$used)) {
+    missingRef <- which(!environment(figRef)$used)
+    warning("Figure(s) ", paste(missingRef, sep = ", "), " with label(s) '", 
+        paste(names(environment(figRef)$used)[missingRef], sep = "', '"), 
+        "' are present in the document but are never referred to in the text.")
+}
+```
