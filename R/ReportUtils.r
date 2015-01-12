@@ -11,16 +11,16 @@ opts_chunk$set(message=F, warning=F) # unless debugging
 options(scipen=3)
 
 # gmisc htmlTable automatic numbering
-options(table_counter = T)
-options(table_counter_str = "<b>Table %s:</b> ")
+# options(table_counter = T)
+# options(table_counter_str = "<b>Table %s:</b> ")
 
-fn = local({
-  i = 0
-  function(x) {
-    i <<- i + 1
-    paste('**Figure ', i, '**: ', x, sep = '')
-  }
-})
+# fn = local({
+#   i = 0
+#   function(x) {
+#     i <<- i + 1
+#     paste('**Figure ', i, '**: ', x, sep = '')
+#   }
+# })
 
 # Alternative to gmisc table_counter
 # use tab.cap="my caption"
