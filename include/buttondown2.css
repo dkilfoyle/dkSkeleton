@@ -86,3 +86,72 @@ h6 {
   font-size: 1em;
   color: #777;
 }
+
+/* pandoc style tables */
+/* over-ride rmarkdown/bootstrap classes: */
+/* remove per row lines, auto width */
+
+.table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  border-bottom: 2pt solid #000;
+  border-top: 2pt solid #000;
+  margin-left: auto;
+  margin-right: auto;
+  width: auto;
+}
+
+.table caption {
+  caption-side: top;
+  border: none;
+  font-size: 0.9em;
+  font-style: italic;
+  text-align: center;
+  margin-bottom: 0.3em;
+  padding-bottom: 0.2em;
+}
+
+.table thead {
+  border-bottom: 1pt solid #000;
+  background-color: #eee;
+}
+
+.table>thead>tr>th {
+border-bottom: 0px solid #ddd;
+}
+
+.table>thead>tr>th, .table>tbody>tr>th, .table>tfoot>tr>th, .table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td {
+border-top: 0px solid #ddd;
+}
+
+
+.table tr.odd:hover, tr.even:hover {
+  background-color: #eee;
+}
+
+
+
+/* buttondown style tables
+
+.table {
+  width: auto;
+  border-bottom: 2pt solid #000;
+  border-top: 2pt solid #000; 
+}
+
+.table td {
+  border-top: none;
+}
+
+.table thead 
+    {
+    border-bottom: 1pt solid #000;
+    background-color: #eee; 
+    }
+
+.table tr.odd:hover, tr.even:hover 
+    {
+    background-color: #eee;
+    } 
+    
+*/
