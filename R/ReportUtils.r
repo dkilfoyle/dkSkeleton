@@ -1,4 +1,5 @@
-require(Gmisc)
+# require(Gmisc)
+library(htmlTable) #install_github("gforge/htmlTable")
 require(knitr)
 
 opts_chunk$set(dev="png", dev.args=list(type="cairo"), dpi=96)

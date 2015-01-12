@@ -46,9 +46,10 @@ Cases and controls are well matched for age and gender.
 
 ## Dataframe as table
 
-```{r}
+```{r }
 # ReportUtils options should insert automatic table numbering
-#htmlTable(x, align="ccc", caption="Mean OCT by Quadrant", tableCSSclass="gmisc_table60")
+# don't need results='asis' since htmlTable v1.02
+htmlTable(head(x), align="ccc", caption="Mean OCT by Quadrant", css.class="gmisc_table60")
 ```
 
 ## 1 Numeric
